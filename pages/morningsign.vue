@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const session = useSession()
 const morningSign = useMorningSign()
-const router = useRouter()
 
-const activeTab = ref('sign')
-const qrCode = ref('')
-const signType = ref<'1' | '2'>('2')
+// 签到点配置（天目湖东操场）
+const SIGN_POINT = {
+  name: '天目湖东操场',
+}
 
 const isSessionValid = computed(() => {
   return session.value && session.value.token
@@ -20,34 +20,13 @@ onMounted(async () => {
 })
 
 const handleSign = async () => {
-  if (!canSign.value) {
-    return
-  }
-
-  // 从签到任务数据中提取 taskId/pointId（取第一个签到点）
-  const firstPoint = morningSign.getTaskData.value?.signPointList?.[0]
-  const taskId = firstPoint?.taskId || ''
-  const pointId = firstPoint?.pointId || ''
-
-  const success = await morningSign.submitSign({
-    signType: signType.value,
-    qrCode: qrCode.value,
-    latitude: '31.3713',
-    longitude: '119.4891',
-    taskId,
-    pointId,
-  })
-
-  if (success) {
-    qrCode.value = ''
-  }
+  if (!canSign.value) return
+  await morningSign.performSign()
 }
 
 const canSign = computed(() => {
   if (morningSign.getSigning.value) return false
-  if (!morningSign.canSign.value) return false
-  if (signType.value === '2' && !qrCode.value) return false
-  return true
+  return morningSign.canSign.value
 })
 
 const signButtonText = computed(() => {
@@ -56,10 +35,7 @@ const signButtonText = computed(() => {
   return '立即签到'
 })
 
-const signTypeItems = [
-  { title: '扫码签到', value: '2' },
-  { title: '位置签到', value: '1' },
-]
+const activeTab = ref('sign')
 
 watch(activeTab, (newTab) => {
   if (newTab === 'score') {
@@ -163,24 +139,10 @@ watch(activeTab, (newTab) => {
             <VCardTitle>签到操作</VCardTitle>
             <VCardText>
               <div class="d-flex flex-column gap-4">
-                <VSelect
-                  v-model="signType"
-                  :items="signTypeItems"
-                  item-title="title"
-                  item-value="value"
-                  label="签到方式"
-                  variant="outlined"
-                />
-
-                <VTextField
-                  v-if="signType === '2'"
-                  v-model="qrCode"
-                  label="二维码内容"
-                  placeholder="请输入二维码内容或扫描二维码"
-                  variant="outlined"
-                  prepend-inner-icon="mdi-qrcode"
-                  :rules="[v => !!v || '请输入二维码内容']"
-                />
+                <VAlert type="info" variant="tonal" density="compact">
+                  <VIcon start icon="mdi-map-marker" />
+                  签到点：{{ SIGN_POINT.name }}
+                </VAlert>
 
                 <VBtn
                   color="primary"
@@ -189,6 +151,7 @@ watch(activeTab, (newTab) => {
                   :loading="morningSign.getSigning.value"
                   @click="handleSign"
                 >
+                  <VIcon start icon="mdi-check-circle" />
                   {{ signButtonText }}
                 </VBtn>
               </div>

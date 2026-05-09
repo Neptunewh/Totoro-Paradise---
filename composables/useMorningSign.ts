@@ -2,6 +2,13 @@ import type { MorningTaskData } from '~/src/types/responseTypes/MorningTaskRespo
 import type { MorningSignData } from '~/src/types/responseTypes/MorningSignResponse'
 import type { MorningScoreData } from '~/src/types/responseTypes/MorningScoreResponse'
 
+// 签到点配置（天目湖东操场）— 直接伪装成这个位置
+const SIGN_POINT = {
+  latitude: 31.3713,
+  longitude: 119.4891,
+  qrCode: 'mornsignPlace-2021091700000706',
+}
+
 interface MorningSignState {
   taskData: MorningTaskData | null
   signResult: MorningSignData | null
@@ -176,6 +183,33 @@ export const useMorningSign = () => {
     Object.assign(state.value, { ...defaultState })
   }
 
+  // 完整签到流程：伪装在签到点 → 提交签到
+  const performSign = async (): Promise<boolean> => {
+    state.value.error = null
+    state.value.success = false
+
+    if (!canSign.value) return false
+
+    state.value.signing = true
+
+    // 直接使用签到点坐标，不获取真实位置
+    const firstPoint = state.value.taskData?.signPointList?.[0]
+    const taskId = firstPoint?.taskId || ''
+    const pointId = firstPoint?.pointId || ''
+    const qrContent = firstPoint?.qrCode || SIGN_POINT.qrCode
+
+    const success = await submitSign({
+      signType: '2',
+      qrCode: qrContent,
+      latitude: SIGN_POINT.latitude.toString(),
+      longitude: SIGN_POINT.longitude.toString(),
+      taskId,
+      pointId,
+    })
+
+    return success
+  }
+
   return {
     state: readonly(state),
 
@@ -192,6 +226,7 @@ export const useMorningSign = () => {
 
     fetchTask,
     submitSign,
+    performSign,
     fetchScore,
     clearError,
     clearSuccess,
