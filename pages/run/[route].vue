@@ -76,7 +76,7 @@ function handleBeforeUnload(e: BeforeUnloadEvent) {
   <p class="text-body-1">已选择路径 {{ target.pointName }}</p>
   <p class="text-body-1 mt-2">请再次确认是否开跑</p>
   <p class="text-body-1 mt-2">开跑时会向龙猫服务器发送请求，所以请尽量不要在开跑后取消</p>
-  <VBtn v-if="!runned && !running" color="primary my-4" append-icon="i-mdi-run" @click="handleRun">
+  <VBtn v-if="!runned && !running" color="primary my-4" append-icon="mdi-run" @click="handleRun">
     确认开跑
   </VBtn>
   <template v-if="running">

@@ -1,41 +1,46 @@
-# 🦫 Totoro Paradise - 阳光跑步助手
+# 🦫 Totoro Paradise - 龙猫乐园
 
-## 注意 release版本不稳定 请本地部署
+> 基于 Nuxt 3 的龙猫校园体育 Web 端，通过逆向龙猫 app API，提供阳光跑、自由跑、早操签到等功能。
 
-### 🎯 主要功能
+> **注意**：release 版本不稳定，建议本地部署。
 
-#### 🏃‍♂️ 阳光跑 (Sun Run)
+## 🎯 主要功能
+
+### 📱 登录
+- 微信扫码登录，自动获取用户信息（学校、学院、学号、姓名）
+- 代理转发请求至 `app.xtotoro.com`，模拟 TotoroSchool iOS 客户端
+
+### 🏃‍♂️ 阳光跑 (Sun Run)
 - 适用于学校固定路线的跑步要求
 - 自动生成符合要求的跑步轨迹和数据
 - 支持多种学校和路线配置
+- 高德地图可视化展示路线（原始路线 + 模拟路线对比）
 
-#### 🆓 自由跑 (Free Run) ⭐
-**完全自定义的跑步记录生成**
-- **距离设置**: 0.5-20公里任意选择
-- **速度控制**: 3-25公里/小时灵活配速
-- **预设模板**: 
-  - 🚶 **轻松跑**: 3公里，6-8公里/小时
-  - 🏃 **标准跑**: 5公里，8-12公里/小时
-  - 🏃‍♂️ **挑战跑**: 10公里，10-15公里/小时
-- **批量执行**: 支持1-10次连续提交
-- **智能间隔**: 1-60分钟自定义间隔时间
-- **真实数据**: 自动计算配速、卡路里、步数等
+### 🆓 自由跑 (Free Run)
+- **距离设置**：0.5-20 公里任意选择
+- **速度控制**：3-25 公里/小时灵活配速
+- **预设模板**：轻松跑 / 标准跑 / 挑战跑
+- **批量执行**：支持 1-10 次连续提交，可自定义间隔时间
+- **真实数据**：自动计算配速、卡路里、步数等
+- **记录管理**：查看历史记录和详情
 
-#### 📊 记录管理
-- 查看所有历史跑步记录
-- 按日期、类型、距离筛选
-- 导出记录数据为Excel/CSV
+### 🌅 早操签到 (Morning Sign)
+- 获取每日签到任务（签到次数、时间窗口、签到点信息）
+- 一键签到，自动使用签到点坐标
+- 签到成绩统计（签到率、完成/缺签次数、成绩）
+- 签到历史记录表
 
-### 💡 使用步骤
-1. **启动程序**: 双击启动文件，等待浏览器自动打开
-2. **选择模式**: 在主页选择"阳光跑"或"自由跑"
-3. **设置参数**: 
-   - 阳光跑: 选择学校和路线
-   - 自由跑: 设置距离、速度或选择预设模板
-4. **开始执行**: 点击开始，等待模拟完成
-5. **查看记录**: 在"跑步记录"页面查看结果
+### 🔧 开发者工具
+- **解码工具** (`/decode`)：请求数据的加解密调试
 
----
+## 💡 使用步骤
+1. **启动程序**：双击启动文件，等待浏览器自动打开
+2. **扫码登录**：使用微信扫码完成登录
+3. **选择功能**：
+   - **阳光跑**：选择路线，设置参数，执行跑步
+   - **自由跑**：设置距离、速度或选择预设模板，支持单次/批量执行
+   - **早操签到**：查看任务，一键签到，查看成绩
+4. **查看记录**：在记录页面查看历史数据
 
 ## 🛠️ 开发者指南
 
@@ -46,204 +51,143 @@
 ### 本地开发
 
 ```bash
-# 克隆项目
 git clone https://github.com/Mandingo1010/totoro-paradise.git
 cd totoro-paradise
-
-# 安装依赖
 pnpm install
-
-# 启动开发服务器
 pnpm dev
 ```
 
-### 构建部署
+### 构建与运行
 
 ```bash
-# 构建生产版本
 pnpm build
-
-# 启动生产服务器
 pnpm start
 ```
 
 ### 测试
 
 ```bash
-# 运行所有测试
 pnpm test
-
-# 运行测试并生成覆盖率报告
 pnpm test:coverage
-
-# 运行特定测试文件
-pnpm test src/classes/ParameterValidator.test.ts
 ```
 
-## 感谢 @BeiyanYunYi
-- 源码来自 https://github.com/BeiyanYunyi/totoro-paradise
-
-## 🏗️ How to build
+### 代码检查
 
 ```bash
-pnpm i
-pnpm build
+pnpm lint
+pnpm lint:fix
 ```
 
-## 🚀 How to run
+## 🐳 部署方式
 
-```bash
-pnpm start
-```
+项目支持多种部署方式：
 
-## ⚛️ How to develop
+| 方式 | 配置文件 |
+|------|----------|
+| **Vercel** | `vercel.json` |
+| **Cloudflare Workers** | `wrangler.toml` |
+| **Docker** | `Dockerfile` + `docker-compose.yml` |
+| **PM2** | `ecosystem.config.cjs` |
+| **GitHub Actions** | `.github/workflows/deploy.yml` |
 
-```bash
-pnpm dev
-```
+Windows 用户可使用根目录下的 `.bat` / `.ps1` 脚本一键启动。
 
-## 🧪 How to test
-
-```bash
-# 运行所有测试
-pnpm test
-
-# 运行测试并生成覆盖率报告
-pnpm test:coverage
-
-# 运行特定测试文件
-pnpm test src/classes/ParameterValidator.test.ts
-```
-
-## 📁 项目结构
+## � 项目结构
 
 ```
 totoro-paradise/
-├── components/           # Vue组件
-│   ├── FreeRunSetup.vue      # 自由跑参数设置
-│   ├── FreeRunExecution.vue  # 跑步执行页面
-│   ├── FreeRunRecords.vue    # 记录列表
-│   ├── FreeRunDetail.vue     # 记录详情
-│   ├── BatchRunSetup.vue     # 批量设置
-│   └── BatchRunExecution.vue # 批量执行
-├── composables/          # Vue Composables
-│   ├── useFreeRun.ts         # 自由跑状态管理
-│   ├── useFreeRunConfig.ts   # 配置管理
-│   └── useSession.ts         # 会话管理
-├── pages/                # 页面路由
-│   ├── freerun.vue           # 自由跑主页
-│   ├── records.vue           # 记录页面
-│   └── records/free/[id].vue # 记录详情页
+├── pages/                    # Nuxt 页面路由
+│   ├── index.vue                 # 首页（微信扫码登录）
+│   ├── scanned.vue               # 登录后（选择模式）
+│   ├── freerun.vue               # 自由跑
+│   ├── morningsign.vue           # 早操签到
+│   ├── records.vue               # 跑步记录
+│   ├── records/free/[id].vue     # 记录详情
+│   ├── run/[route].vue           # 跑步执行
+│   └── decode.vue                # 解码工具
+├── components/               # Vue 组件
+│   ├── FreeRunSetup.vue          # 自由跑参数设置
+│   ├── FreeRunExecution.vue      # 跑步执行
+│   ├── FreeRunRecords.vue        # 记录列表
+│   ├── FreeRunDetail.vue         # 记录详情
+│   ├── BatchRunSetup.vue         # 批量设置
+│   ├── BatchRunExecution.vue     # 批量执行
+│   └── AMap.client.vue           # 高德地图
+├── composables/              # Vue Composables
+│   ├── useSession.ts             # 用户会话管理
+│   ├── useFreeRun.ts             # 自由跑状态管理
+│   ├── useFreeRunConfig.ts       # 自由跑配置
+│   ├── useMorningSign.ts         # 早操签到状态
+│   └── useSunRunPaper.ts         # 阳光跑路线
+├── server/api/               # 服务端 API
+│   ├── totoro/[...slug].ts       # 代理转发到 app.xtotoro.com
+│   ├── scanQr/                   # 扫码 API
+│   ├── run/                      # 跑步相关 API
+│   └── sunRunPaper.post.ts       # 阳光跑路线
 ├── src/
-│   ├── classes/          # 核心类
-│   │   ├── ParameterValidator.ts    # 参数验证
-│   │   ├── RunCalculator.ts         # 数据计算
-│   │   ├── FreeRunDataGenerator.ts  # 数据生成
-│   │   ├── BatchDataGenerator.ts    # 批量生成
-│   │   ├── TemplateManager.ts       # 模板管理
-│   │   ├── RecordManager.ts         # 记录管理
-│   │   ├── FreeRunErrorHandler.ts   # 错误处理
-│   │   └── FreeRunConfig.ts         # 配置类
-│   ├── types/            # TypeScript类型定义
-│   │   ├── requestTypes/     # 请求类型
-│   │   └── responseTypes/    # 响应类型
-│   ├── utils/            # 工具函数
-│   └── wrappers/         # API包装器
-│       └── TotoroApiWrapper.ts
-├── server/               # 服务端API
-└── tests/                # 测试文件
-    └── integration/      # 集成测试
+│   ├── classes/              # 核心类（均含单元测试）
+│   │   ├── FreeRunConfig.ts          # 配置管理（单例）
+│   │   ├── FreeRunDataGenerator.ts   # 跑步数据生成
+│   │   ├── BatchDataGenerator.ts     # 批量数据生成
+│   │   ├── RunCalculator.ts          # 跑步数据计算
+│   │   ├── ParameterValidator.ts     # 参数校验
+│   │   ├── RecordManager.ts          # 记录管理
+│   │   ├── TemplateManager.ts        # 模板管理
+│   │   ├── FreeRunErrorHandler.ts    # 错误处理
+│   │   ├── EncryptionVerifier.ts     # 加密验证
+│   │   ├── NetworkTrafficAnalyzer.ts # 网络分析
+│   │   ├── RequestFormatAnalyzer.ts  # 请求格式分析
+│   │   ├── ResponseFormatAnalyzer.ts # 响应格式分析
+│   │   ├── ApiEndpointDiscovery.ts   # API 端点发现
+│   │   ├── ApiSpecGenerator.ts       # API 规范生成
+│   │   ├── UserSession.ts            # 用户会话
+│   │   └── Vector.ts                 # 向量运算
+│   ├── utils/                # 工具函数
+│   │   ├── generateRoute.ts          # GPS 路线模拟
+│   │   ├── distanceCalculator.ts     # 距离计算
+│   │   ├── encryptRequestContent.ts  # 请求加密
+│   │   ├── decryptRequestContent.ts  # 请求解密
+│   │   ├── nodeRSA.ts                # RSA 加密
+│   │   └── ...
+│   ├── types/                # TypeScript 类型定义
+│   │   ├── requestTypes/         # 请求类型（14 个）
+│   │   ├── responseTypes/        # 响应类型（21 个）
+│   │   └── reverseEngineering/   # 逆向工程类型
+│   ├── wrappers/             # API 封装层
+│   │   └── TotoroApiWrapper.ts       # 统一封装龙猫 API
+│   ├── controllers/          # 控制器
+│   ├── data/                 # 数据（RSA 密钥）
+│   └── middlewares/          # 中间件
+└── tests/                    # 测试
+    ├── setup.ts                  # 测试初始化
+    └── integration/              # 集成测试（5 个）
 ```
 
-## 🔧 配置说明
+## � 配置说明
 
 ### 环境变量
 
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| `NUXT_PUBLIC_API_BASE` | API基础URL | `/api` |
-| `NUXT_PUBLIC_TOTORO_SERVER` | 龙猫服务器地址 | - |
+参考 `.env.example` 和 `.env.production` 配置。
 
 ### 自由跑配置
 
-配置文件位于 `composables/useFreeRunConfig.ts`，支持以下配置项：
+配置通过 `FreeRunConfigManager`（单例）管理，支持 API 超时/重试、数据校验规则、UI 默认参数等。
 
-```typescript
-{
-  api: {
-    endpoints: {
-      submit: '/totoro/freerun',
-      query: '/totoro/freerun/records',
-      detail: '/totoro/freerun/detail'
-    },
-    timeout: 30000,
-    retryConfig: {
-      maxAttempts: 3,
-      backoffStrategy: 'exponential',
-      baseDelay: 1000,
-      maxDelay: 10000
-    }
-  },
-  dataGeneration: {
-    validationRules: {
-      minDistance: 0.5,
-      maxDistance: 20,
-      minSpeed: 3,
-      maxSpeed: 25,
-      minBatchCount: 1,
-      maxBatchCount: 10,
-      minInterval: 1,
-      maxInterval: 60
-    }
-  },
-  ui: {
-    defaultParams: {
-      distance: 3,
-      avgSpeed: 8
-    }
-  }
-}
-```
+## 🔒 技术细节
 
-## 📝 API文档
-
-### 自由跑API端点
-
-#### 提交自由跑记录
-```
-POST /api/totoro/freerun
-```
-
-请求体：
-```json
-{
-  "distance": "3.00",
-  "duration": "1350",
-  "avgSpeed": "8.00",
-  "avgPace": "7:30",
-  "calorie": "180",
-  "steps": "3600",
-  "startTime": "2024-01-01 08:00:00",
-  "endTime": "2024-01-01 08:22:30",
-  "mac": "AA:BB:CC:DD:EE:FF",
-  "deviceInfo": "Android 13",
-  "runType": "1"
-}
-```
-
-#### 查询自由跑记录
-```
-POST /api/totoro/freerun/records
-```
-
-#### 获取记录详情
-```
-POST /api/totoro/freerun/detail
-```
+- **请求加密**：所有 API 请求通过 `encryptRequestContent` 加密，使用 RSA + 自定义加密算法
+- **GPS 路线模拟**：基于向量数学和正态分布，从标准路线插值生成模拟轨迹，添加随机偏移模拟真实 GPS 漂移
+- **API 代理**：服务端将 `/api/totoro/*` 请求代理转发到 `app.xtotoro.com/app/*`，伪装为 TotoroSchool iOS 客户端
+- **设备伪装**：请求携带模拟设备信息（iPhone/Android），MAC 地址等
 
 ## ⚠️ 免责声明
 
 本项目仅供学习和研究目的，请勿用于任何违反学校规定或法律法规的行为。使用本项目产生的任何后果由使用者自行承担。
+
+## 🙏 致谢
+
+- 原作者：[@BeiyanYunyi](https://github.com/BeiyanYunyi) & Clansty
+- 源码：https://github.com/BeiyanYunyi/totoro-paradise
 
 ## 📝 License
 

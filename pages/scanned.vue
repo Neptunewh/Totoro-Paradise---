@@ -1,136 +1,113 @@
 <script setup lang="ts">
-import TotoroApiWrapper from '~/src/wrappers/TotoroApiWrapper';
+import TotoroApiWrapper from '~/src/wrappers/TotoroApiWrapper'
 
-const sunrunPaper = useSunRunPaper();
-const session = useSession();
-const selectValue = ref('');
-const runMode = ref<'sunshine' | 'free'>('sunshine'); // 跑步模式选择
-const data = ref<any>(null);
-const loading = ref(true);
+const sunrunPaper = useSunRunPaper()
+const session = useSession()
+const selectValue = ref('')
+const runMode = ref<'sunshine' | 'free'>('sunshine')
+const data = ref<any>(null)
+const loading = ref(true)
+const error = ref<string | null>(null)
 
-// 检查session是否有效
-const isSessionValid = computed(() => {
-  return session.value && session.value.token;
-});
+const isSessionValid = computed(() => !!session.value?.token)
 
-// 异步加载数据
+const breq = computed(() => ({
+  token: session.value!.token,
+  campusId: session.value!.campusId,
+  schoolId: session.value!.schoolId,
+  stuNumber: session.value!.stuNumber,
+}))
+
 onMounted(async () => {
   if (!isSessionValid.value) {
-    navigateTo('/');
-    return;
+    navigateTo('/')
+    return
   }
-  
   try {
-    const result = await TotoroApiWrapper.getSunRunPaper({
-      token: session.value!.token,
-      campusId: session.value!.campusId,
-      schoolId: session.value!.schoolId,
-      stuNumber: session.value!.stuNumber,
-    });
-    data.value = result;
-    if (result) {
-      sunrunPaper.value = result;
-    }
-  } catch (error) {
-    console.error('Failed to load sun run paper:', error);
-  } finally {
-    loading.value = false;
+    const result = await TotoroApiWrapper.getSunRunPaper(breq.value)
+    data.value = result
+    if (result) sunrunPaper.value = result
   }
-});
+  catch (e) {
+    console.error('Failed to load sun run paper:', e)
+    error.value = '加载路线数据失败'
+  }
+  finally {
+    loading.value = false
+  }
+})
 
 const handleUpdate = (target: string) => {
-  selectValue.value = target;
-};
+  selectValue.value = target
+}
 
 const handleModeChange = (mode: 'sunshine' | 'free') => {
-  runMode.value = mode;
-  selectValue.value = ''; // 重置选择
-};
+  runMode.value = mode
+  selectValue.value = ''
+}
 
-const navigateToFreeRun = () => {
-  navigateTo('/freerun');
-};
-
-const navigateToMorningSign = () => {
-  navigateTo('/morningsign');
-};
+const pickRandomRoute = () => {
+  if (!data.value?.runPointList?.length) return
+  const list = data.value.runPointList
+  selectValue.value = list[Math.floor(Math.random() * list.length)].pointId
+}
 </script>
 <template>
-  <!-- 加载中 -->
   <div v-if="loading" class="d-flex justify-center align-center" style="min-height: 200px;">
     <VProgressCircular indeterminate color="primary" />
   </div>
 
-  <!-- 未登录提示 -->
   <div v-else-if="!isSessionValid" class="text-center pa-4">
-    <VAlert type="warning">
-      请先扫码登录
-    </VAlert>
-    <VBtn color="primary" class="mt-4" @click="navigateTo('/')">
-      返回首页
-    </VBtn>
+    <VAlert type="warning">请先扫码登录</VAlert>
+    <VBtn color="primary" class="mt-4" @click="navigateTo('/')">返回首页</VBtn>
   </div>
 
-  <!-- 主内容 -->
   <template v-else>
-    <p>请核对个人信息</p>
-    <VTable density="compact" class="mb-6 mt-4">
-      <tbody>
-        <tr>
-          <td>学校</td>
-          <td>{{ session?.campusName }}</td>
-        </tr>
-        <tr>
-          <td>学院</td>
-          <td>{{ session?.collegeName }}</td>
-        </tr>
-        <tr>
-          <td>学号</td>
-          <td>{{ session?.stuNumber }}</td>
-        </tr>
-        <tr>
-          <td>姓名</td>
-          <td>{{ session?.stuName }}</td>
-        </tr>
-      </tbody>
-    </VTable>
+    <VAlert v-if="error" type="error" closable class="mb-4" @click:close="error = null">
+      {{ error }}
+    </VAlert>
 
-    <!-- 跑步模式选择 -->
-    <VCard class="mb-4">
-      <VCardTitle>选择跑步模式</VCardTitle>
+    <VCard variant="outlined" class="mb-4">
       <VCardText>
-        <VRow>
-          <VCol cols="12" md="6">
+        <div class="d-flex align-center ga-3">
+          <VIcon icon="mdi-account-circle" size="40" color="primary" />
+          <div>
+            <div class="text-subtitle-1 font-weight-bold">{{ session?.stuName }}</div>
+            <div class="text-caption text-medium-emphasis">{{ session?.campusName }} · {{ session?.collegeName }} · {{ session?.stuNumber }}</div>
+          </div>
+        </div>
+      </VCardText>
+    </VCard>
+
+    <VCard class="mb-4">
+      <VCardTitle class="text-subtitle-1">选择跑步模式</VCardTitle>
+      <VCardText>
+        <VRow dense>
+          <VCol cols="6">
             <VCard
               :variant="runMode === 'sunshine' ? 'elevated' : 'outlined'"
               :color="runMode === 'sunshine' ? 'primary' : undefined"
-              class="cursor-pointer"
+              class="cursor-pointer h-100"
               @click="handleModeChange('sunshine')"
             >
-              <VCardText class="text-center">
-                <VIcon size="48" class="mb-2">mdi-map-marker-path</VIcon>
-                <div class="text-h6">阳光跑</div>
-                <div class="text-body-2">固定路线跑步</div>
-                <div class="text-caption mt-2">
-                  选择学校预设路线进行跑步，系统将自动生成路径数据
-                </div>
+              <VCardText class="text-center pa-3">
+                <VIcon size="36" class="mb-1">mdi-map-marker-path</VIcon>
+                <div class="text-subtitle-2">阳光跑</div>
+                <div class="text-caption">固定路线</div>
               </VCardText>
             </VCard>
           </VCol>
-          <VCol cols="12" md="6">
+          <VCol cols="6">
             <VCard
               :variant="runMode === 'free' ? 'elevated' : 'outlined'"
               :color="runMode === 'free' ? 'primary' : undefined"
-              class="cursor-pointer"
+              class="cursor-pointer h-100"
               @click="handleModeChange('free')"
             >
-              <VCardText class="text-center">
-                <VIcon size="48" class="mb-2">mdi-run-fast</VIcon>
-                <div class="text-h6">自由跑</div>
-                <div class="text-body-2">自定义距离和时间</div>
-                <div class="text-caption mt-2">
-                  自由设置跑步距离和目标时间，支持批量执行和模板选择
-                </div>
+              <VCardText class="text-center pa-3">
+                <VIcon size="36" class="mb-1">mdi-run-fast</VIcon>
+                <div class="text-subtitle-2">自由跑</div>
+                <div class="text-caption">自定义参数</div>
               </VCardText>
             </VCard>
           </VCol>
@@ -138,90 +115,72 @@ const navigateToMorningSign = () => {
       </VCardText>
     </VCard>
 
-    <!-- 阳光跑设置 -->
     <template v-if="data && runMode === 'sunshine'">
       <VSelect
         v-model="selectValue"
         :items="data.runPointList"
         item-title="pointName"
         item-value="pointId"
-        variant="underlined"
-        label="路线"
-        class="mt-2"
+        variant="outlined"
+        label="选择路线"
+        density="comfortable"
+        class="mb-3"
       />
-      <div class="flex gap-4">
-        <VBtn
-          variant="outlined"
-          color="primary"
-          append-icon="i-mdi-gesture"
-          @click="
-            selectValue =
-              data!.runPointList[Math.floor(Math.random() * data!.runPointList.length)].pointId
-          "
-        >
+      <div class="d-flex ga-2 mb-3">
+        <VBtn variant="outlined" color="primary" prepend-icon="mdi-shuffle-variant" @click="pickRandomRoute">
           随机路线
         </VBtn>
-        <NuxtLink v-if="selectValue" :to="`/run/${encodeURIComponent(selectValue)}`">
-          <VBtn class="ml-auto" color="primary" append-icon="i-mdi-arrow-right"> 开始跑步 </VBtn>
-        </NuxtLink>
-        <VBtn v-else class="ml-auto" color="primary" append-icon="i-mdi-arrow-right" disabled>
+        <VSpacer />
+        <VBtn
+          color="primary"
+          :disabled="!selectValue"
+          append-icon="mdi-arrow-right"
+          :to="selectValue ? `/run/${encodeURIComponent(selectValue)}` : undefined"
+        >
           开始跑步
         </VBtn>
       </div>
-      <p class="mb-2 mt-6 text-xs">地图中的路线仅为展示路线生成效果，不等于最终路线</p>
-      <div class="h-50vh w-50vw">
+      <p class="text-caption text-medium-emphasis mb-2">地图中的路线仅为展示路线生成效果，不等于最终路线</p>
+      <div class="map-container">
         <ClientOnly>
           <AMap :target="selectValue" @update:target="handleUpdate" />
         </ClientOnly>
       </div>
     </template>
 
-    <!-- 自由跑设置 -->
     <template v-if="runMode === 'free'">
-      <div class="d-flex gap-2 mt-4">
-        <VBtn
-          color="primary"
-          append-icon="i-mdi-arrow-right"
-          @click="navigateToFreeRun"
-        >
-          开始自由跑
-        </VBtn>
-      </div>
-      <VAlert type="info" variant="tonal" class="mt-4">
-        <VIcon icon="mdi-information" />
-        <div class="ml-2">
-          <div class="font-weight-medium">自由跑功能说明</div>
-          <ul class="mt-2 text-body-2">
-            <li>可自定义跑步距离（0.5-20公里）和目标时间</li>
-            <li>系统自动生成真实的跑步数据（速度、配速、卡路里、步数等）</li>
-            <li>支持预设模板（轻松跑、标准跑、挑战跑）</li>
-            <li>支持批量执行，一次性完成多次跑步记录</li>
-            <li>所有数据将提交到龙猫服务器，与阳光跑记录分开管理</li>
-          </ul>
-        </div>
+      <VBtn color="primary" append-icon="mdi-arrow-right" block class="mb-3" @click="navigateTo('/freerun')">
+        开始自由跑
+      </VBtn>
+      <VAlert type="info" variant="tonal" density="compact">
+        <ul class="pl-4 text-body-2 mb-0">
+          <li>自定义跑步距离（0.5-20km）和目标时间</li>
+          <li>自动计算配速、卡路里、步数</li>
+          <li>支持批量执行和预设模板</li>
+        </ul>
       </VAlert>
     </template>
 
-    <!-- 其他功能 -->
-    <VDivider class="my-6" />
-    <h3 class="text-h6 mb-4">其他功能</h3>
-    <VRow>
-      <VCol cols="12" md="6">
-        <VCard
-          class="cursor-pointer"
-          hover
-          @click="navigateToMorningSign"
-        >
-          <VCardText class="text-center">
-            <VIcon size="48" class="mb-2" color="orange">mdi-alarm-check</VIcon>
-            <div class="text-h6">早操签到</div>
-            <div class="text-body-2">早操签到管理</div>
-            <div class="text-caption mt-2">
-              查看签到任务、提交签到、查看签到成绩
-            </div>
-          </VCardText>
-        </VCard>
-      </VCol>
-    </VRow>
+    <VDivider class="my-4" />
+    <h3 class="text-subtitle-1 mb-3">其他功能</h3>
+    <VCard class="cursor-pointer" hover @click="navigateTo('/morningsign')">
+      <VCardText class="d-flex align-center ga-3">
+        <VIcon size="36" color="warning">mdi-alarm-check</VIcon>
+        <div>
+          <div class="text-subtitle-2">早操签到</div>
+          <div class="text-caption text-medium-emphasis">查看签到任务、提交签到、查看成绩</div>
+        </div>
+      </VCardText>
+    </VCard>
   </template>
 </template>
+
+<style scoped>
+.map-container {
+  width: 100%;
+  height: 40vh;
+  min-height: 250px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+</style>
